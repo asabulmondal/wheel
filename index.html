@@ -647,4 +647,58 @@
             // Final buzzer/haptics when timer hits 0
             clearInterval(timerInterval);
             if (feedbackMode === 'sound') playCountdownEnd();
-            else if (feedbackMode === 'haptic' && navigator.vibrate) navigat
+            else if (feedbackMode === 'haptic' && navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            
+            // Short delay to let players see the 0 before clearing screen
+            setTimeout(() => { endTurn(true); }, 1000); 
+          }
+        }, 1000);
+      } else {
+        overlayTimer.style.display = 'none';
+        setTimeout(() => {
+          endTurn(!(result === "Spin Again" || result === "Steal Turn"));
+        }, 3000);
+      }
+    }
+
+    function updateUIColors() {
+      const color = currentPlayer === 1 ? 'var(--p1-color)' : 'var(--p2-color)';
+      
+      playerText.innerText = `Player ${currentPlayer}`;
+      playerDot.style.backgroundColor = color;
+      playerDot.style.boxShadow = `0 0 10px ${color}`;
+      
+      centerBtn.style.borderColor = color;
+      centerBtn.style.boxShadow = `0 0 20px ${color}66, inset 0 2px 10px rgba(0,0,0,0.05)`;
+    }
+
+    function endTurn(switchPlayer) {
+      overlay.classList.remove('show');
+      
+      if (switchPlayer) {
+        currentPlayer = currentPlayer === 1 ? 2 : 1;
+        updateUIColors();
+      }
+
+      centerBtn.disabled = false;
+      centerBtn.innerText = "HOLD";
+    }
+
+    // --- Event Listeners ---
+    centerBtn.addEventListener('mousedown', startCharge);
+    centerBtn.addEventListener('touchstart', startCharge, { passive: false });
+    
+    // Globally listen for release, but ONLY act if isCharging is true
+    window.addEventListener('mouseup', releaseCharge);
+    window.addEventListener('touchend', releaseCharge, { passive: false });
+    window.addEventListener('resize', initCanvas);
+    
+    themeBtn.addEventListener('click', initCanvas);
+    sysDarkPref.addEventListener('change', initCanvas);
+
+    // Initial load
+    initCanvas();
+    updateUIColors(); 
+  </script>
+</body>
+</html>
