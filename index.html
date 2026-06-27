@@ -12,15 +12,21 @@
       --bg-edge: #4a658a;
       
       --text-color: #1e293b;
-      --control-bg: rgba(255, 255, 255, 0.5);
+      --control-bg: rgba(255, 255, 255, 0.6);
       --control-text: #1e293b;
       
       --p1-color: #3b82f6; 
       --p2-color: #ec4899; 
+      --active-p-color: #3b82f6; 
       
-      --wheel-border: #1e293b;
-      --center-btn-bg: #ffffff;
-      --center-btn-text: #1e293b;
+      /* Realistic 3D Wheel Variables */
+      --bezel-light: #ffffff;
+      --bezel-dark: #94a3b8;
+      --bezel-shadow: rgba(0, 0, 0, 0.3);
+      
+      --btn-grad-top: #ffffff;
+      --btn-grad-bot: #cbd5e1;
+      --btn-shadow: rgba(0, 0, 0, 0.4);
       
       --overlay-bg: rgba(210, 228, 246, 0.95);
       --overlay-text: #1e293b;
@@ -35,9 +41,13 @@
       --control-bg: rgba(255, 255, 255, 0.1);
       --control-text: #cbd5e1;
       
-      --wheel-border: #020617;
-      --center-btn-bg: #1c1c1e;
-      --center-btn-text: #ffffff;
+      --bezel-light: #475569;
+      --bezel-dark: #0f172a;
+      --bezel-shadow: rgba(0, 0, 0, 0.8);
+      
+      --btn-grad-top: #334155;
+      --btn-grad-bot: #020617;
+      --btn-shadow: rgba(0, 0, 0, 0.8);
       
       --overlay-bg: rgba(10, 10, 12, 0.95);
       --overlay-text: #ffffff;
@@ -89,7 +99,7 @@
       padding: 8px 14px;
       border-radius: 20px;
       font-size: 0.85rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
@@ -100,98 +110,122 @@
 
     .control-btn:active { transform: scale(0.92); }
 
-    /* Modern, Sleek Player Indicator */
+    /* Player Indicator */
     .status-badge {
       display: flex;
       align-items: center;
       gap: 12px;
       background: var(--control-bg);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 8px 20px;
+      padding: 10px 24px;
       border-radius: 30px;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
       transition: transform 0.3s ease;
       margin-top: 50px; 
     }
 
     .player-dot {
-      width: 12px;
-      height: 12px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
-      background-color: var(--p1-color);
-      box-shadow: 0 0 10px var(--p1-color);
+      background-color: var(--active-p-color);
+      box-shadow: 0 0 12px var(--active-p-color);
       transition: background-color 0.4s, box-shadow 0.4s;
     }
 
     .player-text {
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: 1.5px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: 2px;
       text-transform: uppercase;
       color: var(--control-text);
       transition: color 0.4s;
     }
 
-    /* Wheel Area */
-    .wheel-wrapper {
+    /* 3D Wheel Bezel & Wrapper */
+    .wheel-bezel {
       position: relative;
       width: 90vw;
       max-width: 380px;
       aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      padding: 14px; /* Thickness of the outer metallic rim */
+      background: linear-gradient(145deg, var(--bezel-light), var(--bezel-dark));
+      box-shadow: 
+        0 20px 40px var(--bezel-shadow),
+        inset 0 4px 10px rgba(255, 255, 255, 0.3),
+        inset 0 -4px 10px rgba(0, 0, 0, 0.4);
       display: flex;
       justify-content: center;
       align-items: center;
-    }
-
-    .pointer {
-      position: absolute;
-      top: -12px;
-      left: 50%;
-      transform: translateX(-50%) rotate(0deg);
-      transform-origin: top center;
-      width: 0;
-      height: 0;
-      border-left: 12px solid transparent;
-      border-right: 12px solid transparent;
-      border-top: 26px solid #ef4444;
-      z-index: 10;
-      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
-      transition: transform 0.05s ease;
-    }
-
-    @keyframes peg-bounce {
-      0% { transform: translateX(-50%) rotate(0deg); }
-      30% { transform: translateX(-50%) rotate(-20deg); } 
-      100% { transform: translateX(-50%) rotate(0deg); }
-    }
-
-    .pointer.tick {
-      animation: peg-bounce 0.12s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: background 0.4s;
     }
 
     canvas {
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      /* Inner rim shadow creates depth separating canvas from bezel */
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 2px 5px rgba(0,0,0,0.5);
     }
 
-    /* Center Button */
+    /* Hardware Pointer Wrapper */
+    .pointer-container {
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 30;
+      width: 40px;
+      height: 55px;
+    }
+
+    .pointer {
+      width: 100%;
+      height: 100%;
+      transform-origin: 20px 12px; /* Anchor rotation exactly at the metallic screw */
+      transition: transform 0.05s ease;
+    }
+
+    @keyframes peg-bounce {
+      0% { transform: rotate(0deg); }
+      30% { transform: rotate(-25deg); } 
+      100% { transform: rotate(0deg); }
+    }
+
+    .pointer.tick {
+      animation: peg-bounce 0.12s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    /* 3D Dome Center Button */
     .center-btn {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 20%; 
-      height: 20%;
+      width: 22%; 
+      height: 22%;
       border-radius: 50%;
-      background-color: var(--center-btn-bg);
-      color: var(--center-btn-text);
-      border: 3px solid var(--p1-color);
-      box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), inset 0 2px 10px rgba(0,0,0,0.05);
-      font-weight: 800;
+      
+      /* Glowing inner rim for active player */
+      border: 4px solid var(--active-p-color);
+      
+      /* Dome lighting gradient */
+      background: radial-gradient(circle at 35% 35%, var(--btn-grad-top) 0%, var(--btn-grad-bot) 75%, #000 100%);
+      
+      /* Massive tactile box shadow stacking */
+      box-shadow: 
+        0 15px 25px var(--btn-shadow), 
+        0 8px 10px rgba(0,0,0,0.5),
+        inset 0 4px 8px rgba(255,255,255,0.4),
+        inset 0 -4px 10px rgba(0,0,0,0.5),
+        0 0 20px rgba(var(--active-p-color), 0.5);
+        
+      color: var(--text-color);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      font-weight: 900;
       font-size: 0.95rem;
       letter-spacing: 1px;
       cursor: pointer;
@@ -199,20 +233,28 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      transition: transform 0.1s, border-color 0.4s, box-shadow 0.4s, background-color 0.4s, color 0.4s;
+      transition: transform 0.1s, box-shadow 0.1s, border-color 0.4s;
     }
 
+    /* Depressed physical button state */
     .center-btn:active {
-      transform: translate(-50%, -50%) scale(0.92);
-      filter: brightness(0.95);
+      transform: translate(-50%, calc(-50% + 5px));
+      box-shadow: 
+        0 5px 10px var(--btn-shadow), 
+        0 2px 5px rgba(0,0,0,0.5),
+        inset 0 2px 5px rgba(255,255,255,0.3),
+        inset 0 -2px 5px rgba(0,0,0,0.5),
+        0 0 15px rgba(var(--active-p-color), 0.5);
+      filter: brightness(0.9);
     }
 
     .center-btn:disabled {
-      background-color: var(--control-bg);
-      border-color: rgba(119, 119, 119, 0.3) !important;
-      box-shadow: none !important;
+      border-color: rgba(119, 119, 119, 0.4) !important;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.3) !important;
       color: #777;
       cursor: not-allowed;
+      transform: translate(-50%, -50%);
+      background: var(--control-bg);
     }
 
     /* Fullscreen Overlay */
@@ -223,8 +265,8 @@
       width: 100vw;
       height: 100vh;
       background-color: var(--overlay-bg);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       z-index: 1000;
       display: flex;
       flex-direction: column;
@@ -241,28 +283,28 @@
     }
 
     .overlay-player {
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       color: var(--overlay-text);
-      opacity: 0.7;
+      opacity: 0.8;
       text-transform: uppercase;
-      letter-spacing: 3px;
+      letter-spacing: 4px;
       margin-bottom: 15px;
-      font-weight: 600;
+      font-weight: 800;
     }
 
     .overlay-title {
-      font-size: 3.5rem;
+      font-size: 4rem;
       color: #f59e0b;
       text-align: center;
       margin-bottom: 20px;
       text-transform: uppercase;
-      font-weight: 800;
+      font-weight: 900;
       text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
 
     .overlay-timer {
-      font-size: 9rem;
-      font-weight: 800;
+      font-size: 10rem;
+      font-weight: 900;
       color: var(--overlay-text);
       line-height: 1;
       text-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
@@ -282,10 +324,34 @@
     <div class="player-text" id="playerText">Player 1</div>
   </div>
 
-  <div class="wheel-wrapper">
-    <div class="pointer" id="pointer"></div>
+  <div class="wheel-bezel">
+    <div class="pointer-container">
+      <div class="pointer" id="pointer">
+        <svg width="40" height="55" viewBox="0 0 40 55" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="pinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ff7b7b" />
+              <stop offset="40%" stop-color="#ef4444" />
+              <stop offset="100%" stop-color="#7f1d1d" />
+            </linearGradient>
+            <linearGradient id="screwGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff" />
+              <stop offset="100%" stop-color="#475569" />
+            </linearGradient>
+            <filter id="dropShadow" x="-30%" y="-30%" width="160%" height="160%">
+               <feDropShadow dx="0" dy="5" stdDeviation="3" flood-opacity="0.6"/>
+            </filter>
+          </defs>
+          <g filter="url(#dropShadow)">
+            <path d="M 8 5 L 32 5 L 20 48 Z" fill="url(#pinGrad)" stroke="#7f1d1d" stroke-width="1.5" stroke-linejoin="round"/>
+            <circle cx="20" cy="12" r="5" fill="url(#screwGrad)" stroke="#1e293b" stroke-width="1"/>
+            <circle cx="20" cy="12" r="2" fill="#0f172a"/>
+          </g>
+        </svg>
+      </div>
+    </div>
     <canvas id="wheelCanvas"></canvas>
-    <div class="center-btn" id="centerBtn">HOLD</div>
+    <button class="center-btn" id="centerBtn">HOLD</button>
   </div>
 
   <div class="fullscreen-overlay" id="fullscreenOverlay">
@@ -388,30 +454,37 @@
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator();
       const gainNode = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-      gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+      
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(1000, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.03);
+      
+      gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
+      
       osc.connect(gainNode);
       gainNode.connect(audioCtx.destination);
       osc.start();
-      osc.stop(audioCtx.currentTime + 0.1);
+      osc.stop(audioCtx.currentTime + 0.03);
     }
 
     function playCountdownEnd() {
       if (!audioCtx) return;
       if (audioCtx.state === 'suspended') audioCtx.resume();
-      const osc = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.3);
-      gainNode.gain.setValueAtTime(0.4, audioCtx.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-      osc.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.5);
+      
+      const frequencies = [523.25, 659.25, 783.99, 1046.50];
+      frequencies.forEach(freq => {
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.type = 'sine'; 
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 1.5);
+      });
     }
 
     // --- Wheel Game Logic & State ---
@@ -421,20 +494,9 @@
       "Eat 5s", "Eat 10s", "Eat 15s", "Spin Again", "Skip Turn", "Steal Turn"
     ];
     
-    // Modern Flat UI Palette 
     const colors = [
-      "#FF6B6B", // Pastel Red
-      "#4ECDC4", // Mint/Teal
-      "#FFD166", // Yellow
-      "#6A4C93", // Muted Purple
-      "#FF9F1C", // Orange
-      "#1982C4", // Ocean Blue
-      "#FF6B6B",
-      "#4ECDC4",
-      "#FFD166",
-      "#6A4C93",
-      "#FF9F1C",
-      "#1982C4"
+      "#FF6B6B", "#4ECDC4", "#FFD166", "#6A4C93", "#FF9F1C", "#1982C4",
+      "#FF6B6B", "#4ECDC4", "#FFD166", "#6A4C93", "#FF9F1C", "#1982C4"
     ];
 
     const canvas = document.getElementById('wheelCanvas');
@@ -464,13 +526,13 @@
     const sliceAngle = (2 * Math.PI) / segments.length;
     let lastPassedSegment = 0;
 
-    // --- Wheel Rendering ---
+    // --- Advanced 3D Wheel Rendering ---
     function initCanvas() {
-      const size = Math.min(window.innerWidth * 0.9, 380);
+      // Calculate size based on bezel width minus padding
+      const bezel = document.querySelector('.wheel-bezel');
+      const size = bezel.clientWidth - 28; // 14px padding * 2
       const scale = window.devicePixelRatio || 1;
       
-      canvas.style.width = size + 'px';
-      canvas.style.height = size + 'px';
       canvas.width = size * scale;
       canvas.height = size * scale;
       
@@ -487,6 +549,8 @@
       const radius = w / 2;
 
       ctx.clearRect(0, 0, w, h);
+      
+      // Step 1: Draw Rotating Slices
       ctx.save();
       ctx.translate(cx, cy);
       ctx.rotate(currentAngle);
@@ -495,45 +559,78 @@
         const startAngle = i * sliceAngle;
         const endAngle = startAngle + sliceAngle;
 
-        // Draw Slice
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.arc(0, 0, radius, startAngle, endAngle);
         ctx.closePath();
         ctx.fillStyle = colors[i];
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
         ctx.fill();
         
-        ctx.lineWidth = 2.5;
-        const isDark = document.body.hasAttribute('data-theme');
-        ctx.strokeStyle = isDark ? '#020617' : '#1e293b'; 
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "rgba(0,0,0,0.2)";
         ctx.stroke();
+      }
+      ctx.restore();
 
-        // Draw Text
+      // Step 2: Global Lighting Overlay (STATIONARY)
+      // This applies a highlight to top-left and shadow to bottom-right, making the disc look 3D.
+      ctx.save();
+      ctx.translate(cx, cy);
+      const lighting = ctx.createLinearGradient(-radius, -radius, radius, radius);
+      lighting.addColorStop(0, "rgba(255, 255, 255, 0.4)");
+      lighting.addColorStop(0.5, "rgba(255, 255, 255, 0)");
+      lighting.addColorStop(1, "rgba(0, 0, 0, 0.5)");
+      
+      ctx.beginPath();
+      ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+      ctx.fillStyle = lighting;
+      ctx.fill();
+      ctx.restore();
+
+      // Step 3: Draw Text and 3D Pegs (ROTATING OVER THE LIGHTING)
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(currentAngle);
+
+      for (let i = 0; i < segments.length; i++) {
+        const startAngle = i * sliceAngle;
+        const pegX = radius * 0.94 * Math.cos(startAngle);
+        const pegY = radius * 0.94 * Math.sin(startAngle);
+
+        // Draw Text perfectly centered
         ctx.save();
         ctx.rotate(startAngle + sliceAngle / 2);
-        ctx.textAlign = "right";
+        ctx.textAlign = "center"; 
         ctx.textBaseline = "middle";
-        
         ctx.fillStyle = "#ffffff";
-        ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
+        ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
         ctx.shadowBlur = 4;
         ctx.shadowOffsetX = 1;
         ctx.shadowOffsetY = 1;
-        
-        ctx.font = "600 " + (radius * 0.105) + "px 'Segoe UI', system-ui, sans-serif";
-        ctx.fillText(segments[i], radius - (radius * 0.25), 0);
+        ctx.font = "800 " + (radius * 0.1) + "px 'Segoe UI', system-ui, sans-serif";
+        ctx.fillText(segments[i], radius * 0.61, 0); 
         ctx.restore();
         
-        // Draw Pegs
+        // Draw 3D Metallic Peg
+        // 1. Drop shadow for peg
         ctx.beginPath();
-        ctx.arc(radius * 0.95 * Math.cos(startAngle), radius * 0.95 * Math.sin(startAngle), 4, 0, 2 * Math.PI);
-        ctx.fillStyle = "#ffffff";
+        ctx.arc(pegX, pegY, 5, 0, 2 * Math.PI);
+        ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+        ctx.shadowBlur = 4;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
+        ctx.fillStyle = "#cbd5e1";
         ctx.fill();
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
+        
+        // 2. Clear shadow and draw metallic gradient
+        ctx.shadowColor = "transparent";
+        ctx.beginPath();
+        ctx.arc(pegX, pegY, 5, 0, 2 * Math.PI);
+        let pegGrad = ctx.createRadialGradient(pegX - 2, pegY - 2, 0, pegX, pegY, 5);
+        pegGrad.addColorStop(0, "#ffffff");
+        pegGrad.addColorStop(1, "#475569");
+        ctx.fillStyle = pegGrad;
+        ctx.fill();
       }
       ctx.restore();
     }
@@ -546,7 +643,7 @@
       if (currentIndex !== lastPassedSegment) {
         lastPassedSegment = currentIndex;
         
-        if (isSpinning) {
+        if (isSpinning || isCharging) {
           if (feedbackMode === 'sound') playTickSound();
           else if (feedbackMode === 'haptic' && navigator.vibrate) navigator.vibrate(10);
 
@@ -554,9 +651,11 @@
           void pointer.offsetWidth; 
           pointer.classList.add('tick');
 
-          const pegResistance = 0.0015 + (Math.random() * 0.0025); 
-          angularVelocity -= pegResistance;
-          if (angularVelocity < 0) angularVelocity = 0;
+          if (!isCharging) {
+            const pegResistance = 0.0015 + (Math.random() * 0.0025); 
+            angularVelocity -= pegResistance;
+            if (angularVelocity < 0) angularVelocity = 0;
+          }
         }
       }
       return currentIndex;
@@ -610,7 +709,6 @@
     }
 
     function releaseCharge(e) {
-      // FIX: Only prevent default and hijack the click if the wheel was actively charging
       if (!isCharging) return; 
       
       if (e.cancelable) e.preventDefault();
@@ -640,17 +738,14 @@
           overlayTimer.innerText = seconds;
           
           if (seconds > 0) {
-            // Tick sounds/haptics during countdown
             if (feedbackMode === 'sound') playCountdownTick();
             else if (feedbackMode === 'haptic' && navigator.vibrate) navigator.vibrate(15);
           } else {
-            // Final buzzer/haptics when timer hits 0
             clearInterval(timerInterval);
             if (feedbackMode === 'sound') playCountdownEnd();
-            else if (feedbackMode === 'haptic' && navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            else if (feedbackMode === 'haptic' && navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
             
-            // Short delay to let players see the 0 before clearing screen
-            setTimeout(() => { endTurn(true); }, 1000); 
+            setTimeout(() => { endTurn(true); }, 1500); 
           }
         }, 1000);
       } else {
@@ -664,12 +759,8 @@
     function updateUIColors() {
       const color = currentPlayer === 1 ? 'var(--p1-color)' : 'var(--p2-color)';
       
+      document.documentElement.style.setProperty('--active-p-color', color);
       playerText.innerText = `Player ${currentPlayer}`;
-      playerDot.style.backgroundColor = color;
-      playerDot.style.boxShadow = `0 0 10px ${color}`;
-      
-      centerBtn.style.borderColor = color;
-      centerBtn.style.boxShadow = `0 0 20px ${color}66, inset 0 2px 10px rgba(0,0,0,0.05)`;
     }
 
     function endTurn(switchPlayer) {
@@ -688,7 +779,6 @@
     centerBtn.addEventListener('mousedown', startCharge);
     centerBtn.addEventListener('touchstart', startCharge, { passive: false });
     
-    // Globally listen for release, but ONLY act if isCharging is true
     window.addEventListener('mouseup', releaseCharge);
     window.addEventListener('touchend', releaseCharge, { passive: false });
     window.addEventListener('resize', initCanvas);
