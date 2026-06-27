@@ -3,16 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="color-scheme" content="light dark">
   <title>Snack Duel</title>
   <style>
+    /* CSS Variables - Light Theme */
     :root {
-      --bg-color: #121212;
+      --bg-center: #d2e4f6;
+      --bg-edge: #4a658a;
+      
+      --text-color: #1e293b;
+      --control-bg: rgba(255, 255, 255, 0.5);
+      --control-text: #1e293b;
+      
+      --p1-color: #3b82f6; 
+      --p2-color: #ec4899; 
+      
+      --wheel-border: #1e293b;
+      --center-btn-bg: #ffffff;
+      --center-btn-text: #1e293b;
+      
+      --overlay-bg: rgba(210, 228, 246, 0.95);
+      --overlay-text: #1e293b;
+    }
+
+    /* High Contrast Dark Theme */
+    [data-theme="dark"] {
+      --bg-center: #1e1b4b; 
+      --bg-edge: #020617;   
+      
       --text-color: #ffffff;
-      --primary-color: #4CAF50;
-      --primary-dark: #388E3C;
-      --meter-bg: #333333;
-      --p1-color: #2196F3;
-      --p2-color: #E91E63;
+      --control-bg: rgba(255, 255, 255, 0.1);
+      --control-text: #cbd5e1;
+      
+      --wheel-border: #020617;
+      --center-btn-bg: #1c1c1e;
+      --center-btn-text: #ffffff;
+      
+      --overlay-bg: rgba(10, 10, 12, 0.95);
+      --overlay-text: #ffffff;
     }
 
     * {
@@ -24,47 +52,93 @@
     }
 
     body {
-      background-color: var(--bg-color);
+      background: radial-gradient(circle at center, var(--bg-center) 0%, var(--bg-edge) 100%);
       color: var(--text-color);
-      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       height: 100vh;
+      height: 100dvh;
       width: 100vw;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-evenly;
+      justify-content: center;
+      gap: 5vh;
+      transition: background 0.4s ease;
+      touch-action: manipulation;
     }
 
-    /* Player Indicator */
-    .player-indicator {
-      font-size: 1.5rem;
-      font-weight: bold;
-      text-transform: uppercase;
-      padding: 12px 30px;
-      border-radius: 25px;
-      transition: background-color 0.4s, color 0.4s, transform 0.3s;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-      text-align: center;
-      width: 80vw;
-      max-width: 300px;
+    /* Top Controls */
+    .top-controls {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      width: 95%;
+      z-index: 100;
     }
 
-    .p1-active {
+    .control-btn {
+      background: var(--control-bg);
+      color: var(--control-text);
+      border: none;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      transition: background 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+    }
+
+    .control-btn:active { transform: scale(0.92); }
+
+    /* Modern, Sleek Player Indicator */
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--control-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 8px 20px;
+      border-radius: 30px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s ease;
+      margin-top: 50px; 
+    }
+
+    .player-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
       background-color: var(--p1-color);
-      color: white;
+      box-shadow: 0 0 10px var(--p1-color);
+      transition: background-color 0.4s, box-shadow 0.4s;
     }
 
-    .p2-active {
-      background-color: var(--p2-color);
-      color: white;
+    .player-text {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--control-text);
+      transition: color 0.4s;
     }
 
     /* Wheel Area */
     .wheel-wrapper {
       position: relative;
       width: 90vw;
-      max-width: 400px;
+      max-width: 380px;
       aspect-ratio: 1 / 1;
       display: flex;
       justify-content: center;
@@ -73,86 +147,71 @@
 
     .pointer {
       position: absolute;
-      top: -15px;
+      top: -12px;
       left: 50%;
       transform: translateX(-50%) rotate(0deg);
       transform-origin: top center;
       width: 0;
       height: 0;
-      border-left: 15px solid transparent;
-      border-right: 15px solid transparent;
-      border-top: 30px solid #FF5252;
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-top: 26px solid #ef4444;
       z-index: 10;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
       transition: transform 0.05s ease;
     }
 
     @keyframes peg-bounce {
       0% { transform: translateX(-50%) rotate(0deg); }
-      30% { transform: translateX(-50%) rotate(-25deg); } 
+      30% { transform: translateX(-50%) rotate(-20deg); } 
       100% { transform: translateX(-50%) rotate(0deg); }
     }
 
     .pointer.tick {
-      animation: peg-bounce 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: peg-bounce 0.12s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     canvas {
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     }
 
-    /* Controls */
-    .controls {
-      width: 90vw;
-      max-width: 400px;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .power-meter {
-      height: 20px;
-      background-color: var(--meter-bg);
-      border-radius: 10px;
-      overflow: hidden;
-      border: 2px solid #444;
-      position: relative;
-    }
-
-    .power-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #FFEB3B, #FF9800, #F44336);
-      transition: width 0.1s linear;
-    }
-
-    .spin-btn {
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      padding: 20px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      text-transform: uppercase;
+    /* Center Button */
+    .center-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20%; 
+      height: 20%;
+      border-radius: 50%;
+      background-color: var(--center-btn-bg);
+      color: var(--center-btn-text);
+      border: 3px solid var(--p1-color);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), inset 0 2px 10px rgba(0,0,0,0.05);
+      font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: 1px;
       cursor: pointer;
-      touch-action: manipulation;
-      box-shadow: 0 6px 0 var(--primary-dark);
-      transition: transform 0.1s, box-shadow 0.1s;
+      z-index: 20;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.1s, border-color 0.4s, box-shadow 0.4s, background-color 0.4s, color 0.4s;
     }
 
-    .spin-btn:active {
-      transform: translateY(6px);
-      box-shadow: 0 0 0 var(--primary-dark);
+    .center-btn:active {
+      transform: translate(-50%, -50%) scale(0.92);
+      filter: brightness(0.95);
     }
 
-    .spin-btn:disabled {
-      background-color: #555;
-      box-shadow: 0 6px 0 #333;
-      color: #999;
+    .center-btn:disabled {
+      background-color: var(--control-bg);
+      border-color: rgba(119, 119, 119, 0.3) !important;
+      box-shadow: none !important;
+      color: #777;
       cursor: not-allowed;
     }
 
@@ -163,7 +222,9 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background-color: rgba(18, 18, 18, 0.98);
+      background-color: var(--overlay-bg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       z-index: 1000;
       display: flex;
       flex-direction: column;
@@ -171,7 +232,7 @@
       justify-content: center;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.3s ease, background-color 0.4s ease;
     }
 
     .fullscreen-overlay.show {
@@ -180,45 +241,51 @@
     }
 
     .overlay-player {
-      font-size: 1.5rem;
-      color: #aaa;
+      font-size: 1.2rem;
+      color: var(--overlay-text);
+      opacity: 0.7;
       text-transform: uppercase;
-      letter-spacing: 2px;
-      margin-bottom: 20px;
+      letter-spacing: 3px;
+      margin-bottom: 15px;
+      font-weight: 600;
     }
 
     .overlay-title {
-      font-size: 4rem;
-      color: #FFCA28;
+      font-size: 3.5rem;
+      color: #f59e0b;
       text-align: center;
       margin-bottom: 20px;
       text-transform: uppercase;
-      text-shadow: 0 4px 10px rgba(0,0,0,0.8);
+      font-weight: 800;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
 
     .overlay-timer {
-      font-size: 10rem;
-      font-weight: bold;
-      color: #ffffff;
+      font-size: 9rem;
+      font-weight: 800;
+      color: var(--overlay-text);
       line-height: 1;
-      text-shadow: 0 4px 15px rgba(0,0,0,0.8);
+      text-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
     }
   </style>
 </head>
 <body>
 
-  <div class="player-indicator p1-active" id="playerIndicator">Player 1's Turn</div>
+  <div class="top-controls">
+    <button class="control-btn" id="themeBtn">🌙 Dark</button>
+    <button class="control-btn" id="feedbackBtn">🔕 Mute</button>
+    <button class="control-btn" id="fullscreenBtn">⛶ Fullscreen</button>
+  </div>
+
+  <div class="status-badge" id="statusBadge">
+    <div class="player-dot" id="playerDot"></div>
+    <div class="player-text" id="playerText">Player 1</div>
+  </div>
 
   <div class="wheel-wrapper">
     <div class="pointer" id="pointer"></div>
     <canvas id="wheelCanvas"></canvas>
-  </div>
-
-  <div class="controls">
-    <div class="power-meter">
-      <div class="power-fill" id="powerFill"></div>
-    </div>
-    <button class="spin-btn" id="spinBtn">Hold To Spin</button>
+    <div class="center-btn" id="centerBtn">HOLD</div>
   </div>
 
   <div class="fullscreen-overlay" id="fullscreenOverlay">
@@ -228,83 +295,178 @@
   </div>
 
   <script>
-    // --- State & Config ---
-    let currentPlayer = 1;
+    // --- LocalStorage & Top Controls Logic ---
+    const safeStorage = {
+      get: (key) => { try { return localStorage.getItem(key); } catch(e) { return null; } },
+      set: (key, value) => { try { localStorage.setItem(key, value); } catch(e) { } }
+    };
 
+    const themeBtn = document.getElementById('themeBtn');
+    const feedbackBtn = document.getElementById('feedbackBtn');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+    const sysDarkPref = window.matchMedia('(prefers-color-scheme: dark)');
+    let currentTheme = safeStorage.get('duel-theme');
+
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        themeBtn.innerText = '☀️ Light';
+      } else {
+        document.body.removeAttribute('data-theme');
+        themeBtn.innerText = '🌙 Dark';
+      }
+    }
+
+    if (currentTheme) applyTheme(currentTheme);
+    else applyTheme(sysDarkPref.matches ? 'dark' : 'light');
+
+    sysDarkPref.addEventListener('change', (e) => {
+      if (!safeStorage.get('duel-theme')) applyTheme(e.matches ? 'dark' : 'light');
+    });
+
+    themeBtn.addEventListener('click', () => {
+      const isDark = document.body.hasAttribute('data-theme');
+      currentTheme = isDark ? 'light' : 'dark';
+      applyTheme(currentTheme);
+      safeStorage.set('duel-theme', currentTheme);
+    });
+
+    fullscreenBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen();
+      }
+    });
+    
+    document.addEventListener('fullscreenchange', () => {
+      fullscreenBtn.innerText = document.fullscreenElement ? '✖ Exit' : '⛶ Fullscreen';
+    });
+
+    let feedbackMode = safeStorage.get('duel-feedback') || 'mute'; 
+    let audioCtx;
+
+    function updateFeedbackUI() {
+      if (feedbackMode === 'mute') feedbackBtn.innerText = '🔕 Mute';
+      else if (feedbackMode === 'haptic') feedbackBtn.innerText = '📳 Vibrate';
+      else feedbackBtn.innerText = '🔊 Sound';
+    }
+    updateFeedbackUI();
+
+    feedbackBtn.addEventListener('click', () => {
+      if (feedbackMode === 'mute') feedbackMode = 'haptic';
+      else if (feedbackMode === 'haptic') {
+        feedbackMode = 'sound';
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      } else feedbackMode = 'mute';
+      
+      safeStorage.set('duel-feedback', feedbackMode);
+      updateFeedbackUI();
+    });
+
+    // --- Audio Synthesis Engine ---
+    function playTickSound() {
+      if (!audioCtx) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      osc.type = 'triangle';
+      const pitch = Math.max(300, 800 * (angularVelocity / MAX_VELOCITY) + 200);
+      osc.frequency.setValueAtTime(pitch, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.03);
+      gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.03);
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.03);
+    }
+
+    function playCountdownTick() {
+      if (!audioCtx) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+      gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.1);
+    }
+
+    function playCountdownEnd() {
+      if (!audioCtx) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.3);
+      gainNode.gain.setValueAtTime(0.4, audioCtx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.5);
+    }
+
+    // --- Wheel Game Logic & State ---
+    let currentPlayer = 1;
     const segments = [
       "Eat 5s", "Eat 10s", "Eat 15s", "Spin Again", "Skip Turn", "Steal Turn",
       "Eat 5s", "Eat 10s", "Eat 15s", "Spin Again", "Skip Turn", "Steal Turn"
     ];
     
+    // Modern Flat UI Palette 
     const colors = [
-      "#E57373", "#81C784", "#64B5F6", "#FFD54F", "#BA68C8", "#FF8A65",
-      "#E57373", "#81C784", "#64B5F6", "#FFD54F", "#BA68C8", "#FF8A65"
+      "#FF6B6B", // Pastel Red
+      "#4ECDC4", // Mint/Teal
+      "#FFD166", // Yellow
+      "#6A4C93", // Muted Purple
+      "#FF9F1C", // Orange
+      "#1982C4", // Ocean Blue
+      "#FF6B6B",
+      "#4ECDC4",
+      "#FFD166",
+      "#6A4C93",
+      "#FF9F1C",
+      "#1982C4"
     ];
 
-    // --- DOM Elements ---
     const canvas = document.getElementById('wheelCanvas');
     const ctx = canvas.getContext('2d');
-    const powerFill = document.getElementById('powerFill');
-    const spinBtn = document.getElementById('spinBtn');
+    const centerBtn = document.getElementById('centerBtn');
     const pointer = document.getElementById('pointer');
-    const playerIndicator = document.getElementById('playerIndicator');
-    
-    // Overlay Elements
+    const playerDot = document.getElementById('playerDot');
+    const playerText = document.getElementById('playerText');
     const overlay = document.getElementById('fullscreenOverlay');
     const overlayPlayer = document.getElementById('overlayPlayer');
     const overlayTitle = document.getElementById('overlayTitle');
     const overlayTimer = document.getElementById('overlayTimer');
 
-    // --- Physics & Spin Variables ---
+    // Physics Variables
     let currentAngle = 0; 
     let angularVelocity = 0; 
-    let isSpinning = false;
     let isCharging = false;
-    let chargeLevel = 0; 
-    let chargeInterval;
+    let isSpinning = false;
+    let animFrame = null;
+    let currentFriction = 0.99; 
 
-    const BASE_FRICTION = 0.990; 
-    const MIN_VELOCITY = 0.15; 
-    const MAX_VELOCITY = 0.50; 
-    const STOP_THRESHOLD = 0.0005; 
+    const BASE_TAP_VELOCITY = 0.38; 
+    const MAX_VELOCITY = 0.65;      
+    const CHARGE_RATE = 0.006;      
+    const STOP_THRESHOLD = 0.0003; 
     
     const sliceAngle = (2 * Math.PI) / segments.length;
     let lastPassedSegment = 0;
 
-    // --- Audio Context ---
-    let audioCtx;
-    function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-    }
-
-    function playTickSound() {
-      if (!audioCtx) return;
-      const osc = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-      
-      osc.type = 'triangle';
-      const pitch = Math.max(300, 800 * (angularVelocity / MAX_VELOCITY) + 200);
-      osc.frequency.setValueAtTime(pitch, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.03);
-      
-      gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.03);
-      
-      osc.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.03);
-    }
-
     // --- Wheel Rendering ---
     function initCanvas() {
-      const size = Math.min(window.innerWidth * 0.9, 400);
+      const size = Math.min(window.innerWidth * 0.9, 380);
       const scale = window.devicePixelRatio || 1;
       
       canvas.style.width = size + 'px';
@@ -333,29 +495,44 @@
         const startAngle = i * sliceAngle;
         const endAngle = startAngle + sliceAngle;
 
+        // Draw Slice
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.arc(0, 0, radius, startAngle, endAngle);
         ctx.closePath();
         ctx.fillStyle = colors[i];
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
         ctx.fill();
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = '#121212';
+        
+        ctx.lineWidth = 2.5;
+        const isDark = document.body.hasAttribute('data-theme');
+        ctx.strokeStyle = isDark ? '#020617' : '#1e293b'; 
         ctx.stroke();
 
+        // Draw Text
         ctx.save();
         ctx.rotate(startAngle + sliceAngle / 2);
         ctx.textAlign = "right";
         ctx.textBaseline = "middle";
-        ctx.fillStyle = "#121212";
-        ctx.font = "bold " + (radius * 0.12) + "px sans-serif";
-        ctx.fillText(segments[i], radius - 15, 0);
+        
+        ctx.fillStyle = "#ffffff";
+        ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
+        ctx.shadowBlur = 4;
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 1;
+        
+        ctx.font = "600 " + (radius * 0.105) + "px 'Segoe UI', system-ui, sans-serif";
+        ctx.fillText(segments[i], radius - (radius * 0.25), 0);
         ctx.restore();
         
+        // Draw Pegs
         ctx.beginPath();
         ctx.arc(radius * 0.95 * Math.cos(startAngle), radius * 0.95 * Math.sin(startAngle), 4, 0, 2 * Math.PI);
         ctx.fillStyle = "#ffffff";
         ctx.fill();
+        ctx.lineWidth = 1.5;
         ctx.stroke();
       }
       ctx.restore();
@@ -370,43 +547,79 @@
         lastPassedSegment = currentIndex;
         
         if (isSpinning) {
-          playTickSound();
-          if (navigator.vibrate) navigator.vibrate(10);
+          if (feedbackMode === 'sound') playTickSound();
+          else if (feedbackMode === 'haptic' && navigator.vibrate) navigator.vibrate(10);
 
           pointer.classList.remove('tick');
           void pointer.offsetWidth; 
           pointer.classList.add('tick');
+
+          const pegResistance = 0.0015 + (Math.random() * 0.0025); 
+          angularVelocity -= pegResistance;
+          if (angularVelocity < 0) angularVelocity = 0;
         }
       }
       return currentIndex;
     }
 
-    // --- Physics Engine ---
+    // --- Unpredictable Physics Engine ---
     function animatePhysics() {
-      if (!isSpinning) return;
+      if (isCharging) {
+        angularVelocity = Math.min(angularVelocity + CHARGE_RATE, MAX_VELOCITY);
+      } else if (isSpinning) {
+        const jitter = (Math.random() * 0.001) - 0.0005;
+        angularVelocity *= (currentFriction + jitter);
+      } else {
+        return; 
+      }
 
       currentAngle += angularVelocity;
-      
-      let currentFriction = BASE_FRICTION;
-      if (angularVelocity < 0.08) currentFriction = 0.995; 
-      if (angularVelocity < 0.02) currentFriction = 0.998; 
-      
-      angularVelocity *= currentFriction;
-
-      if (currentAngle >= 2 * Math.PI) {
-        currentAngle %= (2 * Math.PI);
-      }
+      if (currentAngle >= 2 * Math.PI) currentAngle %= (2 * Math.PI);
 
       drawWheel();
       const winningIndex = updatePointerSegment();
 
-      if (angularVelocity < STOP_THRESHOLD) {
+      if (!isCharging && isSpinning && angularVelocity <= STOP_THRESHOLD) {
         isSpinning = false;
         angularVelocity = 0;
+        animFrame = null;
+        
+        if (feedbackMode === 'haptic' && navigator.vibrate) navigator.vibrate([40, 20, 40]);
+        
         handleGameplayLogic(segments[winningIndex]);
-      } else {
-        requestAnimationFrame(animatePhysics);
+        return;
       }
+
+      animFrame = requestAnimationFrame(animatePhysics);
+    }
+
+    // --- Center Button Controls ---
+    function startCharge(e) {
+      if (e.cancelable) e.preventDefault();
+      if (isSpinning || centerBtn.disabled) return;
+      
+      if (!audioCtx && feedbackMode === 'sound') {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      
+      isCharging = true;
+      centerBtn.innerText = "SPIN!";
+      angularVelocity = BASE_TAP_VELOCITY; 
+
+      if (!animFrame) animFrame = requestAnimationFrame(animatePhysics);
+    }
+
+    function releaseCharge(e) {
+      // FIX: Only prevent default and hijack the click if the wheel was actively charging
+      if (!isCharging) return; 
+      
+      if (e.cancelable) e.preventDefault();
+      
+      isCharging = false;
+      isSpinning = true;
+      centerBtn.innerText = "WAIT";
+      centerBtn.disabled = true;
+      currentFriction = 0.989 + (Math.random() * 0.004); 
     }
 
     // --- Gameplay Logic ---
@@ -415,7 +628,6 @@
       overlayTitle.innerText = result;
       overlay.classList.add('show');
 
-      // Check if it's an Eating Action
       if (result.startsWith("Eat")) {
         const secondsMatch = result.match(/\d+/);
         let seconds = secondsMatch ? parseInt(secondsMatch[0]) : 5;
@@ -427,95 +639,12 @@
           seconds--;
           overlayTimer.innerText = seconds;
           
-          if (seconds <= 0) {
+          if (seconds > 0) {
+            // Tick sounds/haptics during countdown
+            if (feedbackMode === 'sound') playCountdownTick();
+            else if (feedbackMode === 'haptic' && navigator.vibrate) navigator.vibrate(15);
+          } else {
+            // Final buzzer/haptics when timer hits 0
             clearInterval(timerInterval);
-            endTurn(true); // Switch to next player
-          }
-        }, 1000);
-      } else {
-        // Not an eating action, just display text then process rules
-        overlayTimer.style.display = 'none';
-        
-        setTimeout(() => {
-          let shouldSwitchPlayer = true;
-          
-          if (result === "Spin Again" || result === "Steal Turn") {
-            // Player keeps their turn
-            shouldSwitchPlayer = false;
-          } 
-          // "Skip Turn" switches to the other player immediately 
-          
-          endTurn(shouldSwitchPlayer);
-        }, 3000); // Wait 3 seconds to let players read it
-      }
-    }
-
-    function endTurn(switchPlayer) {
-      overlay.classList.remove('show');
-      
-      if (switchPlayer) {
-        currentPlayer = currentPlayer === 1 ? 2 : 1;
-        
-        if (currentPlayer === 1) {
-          playerIndicator.innerText = "Player 1's Turn";
-          playerIndicator.className = "player-indicator p1-active";
-        } else {
-          playerIndicator.innerText = "Player 2's Turn";
-          playerIndicator.className = "player-indicator p2-active";
-        }
-      }
-
-      spinBtn.disabled = false;
-      spinBtn.innerText = "Hold To Spin";
-    }
-
-    // --- Controls ---
-    function startCharging(e) {
-      if (e.cancelable) e.preventDefault();
-      if (isSpinning || spinBtn.disabled) return;
-      
-      initAudio(); 
-
-      isCharging = true;
-      chargeLevel = 0;
-      spinBtn.innerText = "Charging...";
-      
-      clearInterval(chargeInterval);
-      chargeInterval = setInterval(() => {
-        if (chargeLevel < 1) {
-          chargeLevel += 0.02; 
-          powerFill.style.width = (chargeLevel * 100) + '%';
-        }
-      }, 20);
-    }
-
-    function releaseCharge(e) {
-      if (e.cancelable) e.preventDefault();
-      if (!isCharging || isSpinning) return;
-      
-      isCharging = false;
-      clearInterval(chargeInterval);
-      
-      angularVelocity = MIN_VELOCITY + (chargeLevel * (MAX_VELOCITY - MIN_VELOCITY));
-      
-      powerFill.style.width = '0%';
-      spinBtn.disabled = true;
-      spinBtn.innerText = "Spinning...";
-      
-      isSpinning = true;
-      requestAnimationFrame(animatePhysics);
-    }
-
-    // --- Initialization & Listeners ---
-    spinBtn.addEventListener('mousedown', startCharging);
-    spinBtn.addEventListener('touchstart', startCharging, { passive: false });
-    
-    window.addEventListener('mouseup', releaseCharge);
-    window.addEventListener('touchend', releaseCharge, { passive: false });
-    window.addEventListener('resize', initCanvas);
-
-    initCanvas();
-  </script>
-</body>
-  </html>
-  
+            if (feedbackMode === 'sound') playCountdownEnd();
+            else if (feedbackMode === 'haptic' && navigator.vibrate) navigat
