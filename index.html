@@ -19,7 +19,7 @@
       --p2-color: #ec4899; 
       --active-p-color: #3b82f6; 
       
-      /* Realistic 3D Wheel Variables */
+      /* Realistic 3D Wheel Variablesctx */
       --bezel-light: #ffffff;
       --bezel-dark: #94a3b8;
       --bezel-shadow: rgba(0, 0, 0, 0.3);
@@ -487,11 +487,37 @@
       });
     }
 
+    function playEventSound(type) {
+      if (!audioCtx) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      
+      if (type === 'bad') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(250, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.8);
+        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+      } else if (type === 'good') {
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(900, audioCtx.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+      }
+
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 1.0);
+    }
+
     // --- Wheel Game Logic & State ---
     let currentPlayer = 1;
     const segments = [
-      "Eat 5s", "Eat 10s", "Eat 15s", "Spin Again", "Skip Turn", "Steal Turn",
-      "Eat 5s", "Eat 10s", "Eat 15s", "Spin Again", "Skip Turn", "Steal Turn"
+      "Eat 5s", "Skip Turn", "Eat 20s", "Eat 5s", "Spin Again", "Eat 15s",
+      "Eat 5s", "Skip Turn", "Eat 10s", "Spin Again", "Eat 5s", "Eat 15s"
     ];
     
     const colors = [
@@ -750,8 +776,19 @@
         }, 1000);
       } else {
         overlayTimer.style.display = 'none';
+        
+        // Trigger sounds and haptics for events
+        if (result === "Skip Turn") {
+          if (feedbackMode === 'sound') playEventSound('bad');
+          else if (feedbackMode === 'haptic' && navigator.vibrate) navigator.vibrate([200, 100, 400]);
+        } else if (result === "Spin Again") {
+          if (feedbackMode === 'sound') playEventSound('good');
+          else if (feedbackMode === 'haptic' && navigator.vibrate) navigator.vibrate([100, 50, 100]);
+        }
+
         setTimeout(() => {
-          endTurn(!(result === "Spin Again" || result === "Steal Turn"));
+          // Switch player unless it's Spin Again (Steal Turn removed)
+          endTurn(result !== "Spin Again");
         }, 3000);
       }
     }
